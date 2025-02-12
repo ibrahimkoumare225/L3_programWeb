@@ -1,15 +1,21 @@
 <?php
 
 require_once 'Router.php';
-require_once 'CommentManager.php';
+require_once 'AuthController.php';
+require_once 'CommentController.php';
 
-// Initialize the router and comment manager
+session_start(); // Start the session
+
 $router = new Router();
-$commentManager = new CommentManager(__DIR__ . '/data/comments.json');
+$authController = new AuthController(__DIR__ . '/data/users.json');
+$commentController = new CommentController(__DIR__ . '/data/comments.json', $authController);
 
-// Register the POST /comment route
-$router->register('POST', '/comment', [$commentManager, 'handleCommentRequest']);
-$router->register('GET', '/comment', [$commentManager, 'handleGetCommentsRequest']);
+$router->register('POST', '/register', [$authController, 'handleRegister']);
+$router->register('POST', '/login', [$authController, 'handleLogin']);
+$router->register('POST', '/logout', [$authController, 'handleLogout']);
 
-// Handle the incoming request
+$router->register('POST', '/comment', [$commentController, 'handlePostCommentRequest']);
+$router->register('GET', '/comment', [$commentController, 'handleGetCommentsRequest']);
+$router->register('DELETE', '/comment', [$commentController, 'handleDeleteCommentRequest']);
+
 $router->handleRequest();
